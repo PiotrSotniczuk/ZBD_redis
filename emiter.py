@@ -2,6 +2,7 @@ import redis
 import json
 import random
 import string
+from datetime import datetime
 
 from conf import redis_host, redis_port, redis_password
 
@@ -14,11 +15,13 @@ if __name__ == '__main__':
         p_bet = r.pubsub()
         p_bet.psubscribe('better')
 
+        max = datetime.now() - datetime.now()
 
         for message in p_bas.listen():
             if message["type"] == 'psubscribe':
                 continue
 
+            start = datetime.now()
             decision = random.uniform(0.0, 1.0)
             id = message["data"]
 
@@ -39,9 +42,13 @@ if __name__ == '__main__':
                     r.rpush("better", row_js)
                 else:
                     r.rpush("basic", row_js)
-       
+
+            end = datetime.now()
+            if end - start > max:
+                max = end - start
     except Exception as e:
         print(e)
 
     print("emiter finito")
+    print(max)
     
