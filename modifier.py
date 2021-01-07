@@ -17,10 +17,17 @@ if __name__ == '__main__':
         r = redis.StrictRedis(host=redis_host, port=redis_port, password=redis_password, decode_responses=True)
         p = r.pubsub()
         p.psubscribe('basic')
+
         for message in p.listen():
-            print(message)
-            row_js = r.get(message["data"])
-            print(row_js)
+            if message["type"] == 'psubscribe':
+                continue
+
+            id = message["data"]
+
+            if id == '-1':
+                break
+
+            row_js = r.get(id)
             row = json.loads(row_js)
 
             row["Country"] = country_generator()
@@ -32,3 +39,4 @@ if __name__ == '__main__':
     except Exception as e:
         print(e)
     
+    print("modifier finito")
