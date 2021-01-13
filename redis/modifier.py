@@ -27,14 +27,10 @@ if __name__ == '__main__':
             if id == '-1':
                 break
 
-            row_js = r.get(id)
-            row = json.loads(row_js)
+            # TODO use lua
+            r.set(id+'_GEO', country_generator()+city_generator())
 
-            row["Country"] = country_generator()
-            row["City"] = city_generator()
-            r.set(row["id"], json.dumps(row))
-
-            r.publish("better", row["id"])
+            r.publish("better", id)
        
     except Exception as e:
         print(e)

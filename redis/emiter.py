@@ -1,6 +1,7 @@
 import redis
 import json
 import random
+import time
 import string
 from datetime import datetime
 
@@ -15,35 +16,32 @@ if __name__ == '__main__':
         p_bet = r.pubsub()
         p_bet.psubscribe('better')
 
-        max = datetime.now() - datetime.now()
+        max = 0.0
 
         for message in p_bas.listen():
             if message["type"] == 'psubscribe':
                 continue
-
-            start = datetime.now()
+            
             decision = random.uniform(0.0, 1.0)
             id = message["data"]
 
             if id == '-1':
                 break
-            
             if decision < 0.6:
                 if decision >  0.1:
                     for mes in p_bet.listen():
-                        if mes["type"] == 'psubscribe':
-                            continue    
-
-                        if mes["data"] == id:
+                        if mes["data"] == id and mes["type"] == 'pmessage':
                             break
 
-                row_js = r.get(id)
+                
                 if decision > 0.1:
-                    r.rpush("better", row_js)
+                    r.rpush("better", id)
                 else:
-                    r.rpush("basic", row_js)
+                    r.rpush("basic", id)
 
-            end = datetime.now()
+            start = float(r.get(id +'_T'))
+            end = time.time() * 1000.0
+            
             if end - start > max:
                 max = end - start
     except Exception as e:
