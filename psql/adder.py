@@ -5,12 +5,9 @@ import struct
 import random
 import time
 
-nr_people = 150
+nr_people = 1000
 conn = None
 data = []
-for i in range(nr_people):
-    data.append({"id": i, "IP": socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))})
-
 
 if __name__ == '__main__':
     
@@ -21,13 +18,15 @@ if __name__ == '__main__':
         
         cur = conn.cursor()
         cur.execute("drop table ads;")
-        cur.execute("create table ads(id integer primary key, ip text not null, country text, city text);")
+        cur.execute("create table ads(id integer primary key, ip text not null, country text, city text, time float, stat text);")
         conn.commit()
 
-        for row in data:
-            cur.execute("insert into ads values (%s,%s, null, null);", (row["id"],row["IP"]))
+        for i in range(nr_people):
+            row = {"id": i, "IP": socket.inet_ntoa(struct.pack('>I', random.randint(1, 0xffffffff)))}
+            cur.execute("insert into ads values (%s,%s, null, null, %s);", (row["id"],row["IP"], time.time()*1000.0))
             cur.execute("notify basic, '%s';", [row["id"]])
             conn.commit()
+            time.sleep(0.003)
 
         cur.execute("notify basic, '%s';", [-1])
         conn.commit()
@@ -38,3 +37,4 @@ if __name__ == '__main__':
     finally:
         if conn is not None:
             conn.close()
+    print("psql adder finito")

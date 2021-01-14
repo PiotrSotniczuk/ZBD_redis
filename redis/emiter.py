@@ -39,7 +39,6 @@ if __name__ == '__main__':
                 decision = 2    
 
             id = message["data"]
-            # TODO add other workers and move to LUA
             if id == '-1':
                 break
             

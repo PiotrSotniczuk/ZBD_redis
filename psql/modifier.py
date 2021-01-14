@@ -35,7 +35,9 @@ if __name__ == '__main__':
                 notify = conn.notifies.pop(0)
                 id = notify.payload.strip()
                 
-                curs.execute("update ads set country=%s, city=%s where id=%s", [country_generator(), city_generator(),id])
+                curs.execute("update ads set country=%s, city=%s where id=%s and city is null", [country_generator(), city_generator(),id])
+                curs.execute("notify better, %s;", [id])
+                conn.commit()
 
             if id == "-1":
                 print("break  with id")
@@ -46,3 +48,4 @@ if __name__ == '__main__':
     finally:
         if conn is not None:
             conn.close()
+    print("psql modifier finito")
