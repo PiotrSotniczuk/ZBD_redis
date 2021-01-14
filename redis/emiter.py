@@ -4,8 +4,10 @@ import random
 import time
 import string
 from datetime import datetime
+from statistics import mean
 
 from conf import redis_host, redis_port, redis_password
+times = []
 
 if __name__ == '__main__':
     
@@ -24,7 +26,7 @@ if __name__ == '__main__':
             
             decision = random.uniform(0.0, 1.0)
             id = message["data"]
-
+            # TODO add other workers and move to LUA
             if id == '-1':
                 break
             if decision < 0.6:
@@ -33,20 +35,28 @@ if __name__ == '__main__':
                         if mes["data"] == id and mes["type"] == 'pmessage':
                             break
 
-                
+                if r.exists(id+'_END'):
+                    continue
+
                 if decision > 0.1:
-                    r.rpush("better", id)
+                    r.set(id+'_END', 'better')
                 else:
-                    r.rpush("basic", id)
+                    r.set(id + '_END', 'basic')
+            else :
+                if r.exists(id+'_END'):
+                    continue
+                r.set(id + '_END', 'none')
 
             start = float(r.get(id +'_T'))
             end = time.time() * 1000.0
-            
-            if end - start > max:
-                max = end - start
+            delta = end - start
+            times.append(delta)
+            if delta > max:
+                max = delta
     except Exception as e:
         print(e)
 
     print("emiter finito")
-    print(max)
+    print("max-->",max)
+    print("mean-->", mean(times))
     
