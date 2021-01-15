@@ -21,9 +21,7 @@ if __name__ == '__main__':
             r.set(str(i)+"_IP", row["IP"])
             r.set(str(i)+"_T", time.time()*1000.0)
             r.publish("basic", str(i))
-            # if more then overflow with requests
-            
-            
+            time.sleep(0.003)
 
         r.publish("basic", -1)
        

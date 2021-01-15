@@ -14,7 +14,8 @@ if __name__ == '__main__':
     try:
         time.sleep(1.0)
         conn = connect(host="localhost", dbname="adds", user="ps", password="ps")
-                
+        conn.set_isolation_level(extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+               
         
         cur = conn.cursor()
         cur.execute("drop table ads;")
@@ -26,7 +27,6 @@ if __name__ == '__main__':
             cur.execute("insert into ads values (%s,%s, null, null, %s);", (row["id"],row["IP"], time.time()*1000.0))
             cur.execute("notify basic, '%s';", [row["id"]])
             conn.commit()
-            time.sleep(0.003)
 
         cur.execute("notify basic, '%s';", [-1])
         conn.commit()
